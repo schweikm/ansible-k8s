@@ -1,0 +1,17 @@
+---
+ansible-navigator:
+  color:
+    enable: true
+
+  editor:
+    command: vim
+
+  execution-environment:
+    image: ghcr.io/ansible/creator-ee:v0.18.0
+    pull:
+      policy: missing
+
+  mode: interactive
+
+  playbook-artifact:
+    enable: false
