@@ -1,0 +1,9 @@
+---
+# tasks file for k8s_control_plane
+
+- name: open api port
+  ansible.posix.firewalld:
+    state: enabled
+    port: 6443/tcp
+    immediate: true
+    permanent: true
