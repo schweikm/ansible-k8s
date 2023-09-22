@@ -1,0 +1,7 @@
+---
+- name: Kubernetes Control Plane
+  hosts: control_plane
+  tasks:
+    - name: import role
+      ansible.builtin.import_role:
+        name: k8s_control_plane
