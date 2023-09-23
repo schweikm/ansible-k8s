@@ -8,6 +8,18 @@
       vars:
         selinux_policy: targeted
         selinux_state: permissive
+
+    - name: chrony
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.timesync
+      vars:
+        timesync_ntp_servers:
+          - hostname: 2.fedora.pool.ntp.org
+            maxpoll: 10
+            iburst: true
+            pool: true
+            prefer: true
+
     - name: import role
       ansible.builtin.import_role:
         name: schweikm.k8s_control_plane
