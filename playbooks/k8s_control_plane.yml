@@ -2,6 +2,12 @@
 - name: Kubernetes Control Plane
   hosts: control_plane
   tasks:
+    - name: SELinux
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.selinux
+      vars:
+        selinux_policy: targeted
+        selinux_state: permissive
     - name: import role
       ansible.builtin.import_role:
         name: k8s_control_plane
