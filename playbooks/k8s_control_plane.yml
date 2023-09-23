@@ -9,7 +9,7 @@
         selinux_policy: targeted
         selinux_state: permissive
 
-    - name: chrony
+    - name: Chrony
       ansible.builtin.import_role:
         name: fedora.linux_system_roles.timesync
       vars:
@@ -20,6 +20,14 @@
             pool: true
             prefer: true
 
-    - name: import role
+    - name: Crypto policies
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.crypto_policies
+      vars:
+        crypto_policies_policy: FUTURE
+        crypto_policies_reload: true
+        crypto_policies_reboot_ok: true
+
+    - name: Kubernetes Control Plane
       ansible.builtin.import_role:
         name: schweikm.k8s_control_plane
