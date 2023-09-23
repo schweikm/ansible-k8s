@@ -10,4 +10,4 @@
         selinux_state: permissive
     - name: import role
       ansible.builtin.import_role:
-        name: k8s_control_plane
+        name: schweikm.k8s_control_plane
