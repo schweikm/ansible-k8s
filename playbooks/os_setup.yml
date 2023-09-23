@@ -1,5 +1,5 @@
 ---
-- name: Common Configuration
+- name: OS Configuration
   hosts: all
   tasks:
     - name: SELinux
