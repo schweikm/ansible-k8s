@@ -1,0 +1,38 @@
+---
+- name: Common Configuration
+  hosts: all
+  tasks:
+    - name: SELinux
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.selinux
+      vars:
+        selinux_policy: targeted
+        selinux_state: permissive
+
+    - name: Chrony
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.timesync
+      vars:
+        timesync_ntp_servers:
+          - hostname: 2.fedora.pool.ntp.org
+            maxpoll: 10
+            iburst: true
+            pool: true
+            prefer: true
+
+    - name: Crypto policies
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.crypto_policies
+      vars:
+        crypto_policies_policy: FUTURE
+        crypto_policies_reload: true
+        crypto_policies_reboot_ok: true
+
+    - name: Firewalld
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.firewall
+      vars:
+        firewall_disable_conflicting_services: true
+        firewall:
+          - port: "{{ firewalld_ports }}"
+            state: enabled

@@ -1,0 +1,3 @@
+---
+
+firewalld_ports: ['6443/tcp']
