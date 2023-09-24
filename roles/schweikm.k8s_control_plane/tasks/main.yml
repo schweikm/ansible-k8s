@@ -9,3 +9,16 @@
   loop:
     - br_netfilter
     - overlay
+
+- name: Kernel Settings
+  ansible.builtin.import_role:
+    name: fedora.linux_system_roles.kernel_settings
+  vars:
+    kernel_settings_reboot_ok: true
+    kernel_settings_sysctl:
+      - name: net.bridge.bridge-nf-call-iptables
+        value: 1
+      - name: net.bridge.bridge-nf-call-ip6tables
+        value: 1
+      - name: net.ipv4.ip_forward
+        value: 1
