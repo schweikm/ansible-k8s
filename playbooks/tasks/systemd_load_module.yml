@@ -1,0 +1,41 @@
+---
+
+# @param module
+#   The module name to load
+#
+# @param persistent
+#   When true, load at boot time
+
+- name: Persistenly load module {{ module }}
+  when: "persistent | default(true) | bool"
+  block:
+    - name: Create systemd modules directory
+      ansible.builtin.file:
+        state: directory
+        path: /etc/modules-load.d/
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Create module drop-in
+      ansible.builtin.lineinfile:
+        state: present
+        path: /etc/modules-load.d/k8s.conf
+        line: "{{ module }}"
+        create: true
+        owner: root
+        group: root
+        mode: "0644"
+
+- name: Determine if module is load {{ module }}
+  ansible.builtin.command:
+    cmd: grep "^{{ module }} " /proc/modules
+  register: grep_module
+  failed_when: grep_module.rc not in [0, 1]
+  changed_when: false
+
+- name: Load module {{ module }}
+  ansible.builtin.command:
+    cmd: modprobe {{ module }}
+  when: grep_module.rc == 1
+  changed_when: grep_module.rc == 1

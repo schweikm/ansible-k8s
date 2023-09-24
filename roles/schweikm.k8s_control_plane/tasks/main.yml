@@ -1,2 +1,11 @@
 ---
 # tasks file for k8s_control_plane
+
+- name: Load modules
+  ansible.builtin.include_tasks: tasks/systemd_load_module.yml
+  vars:
+    module: "{{ item }}"
+    persistent: true
+  loop:
+    - br_netfilter
+    - overlay
