@@ -1,3 +1,9 @@
 ---
 
-firewalld_ports: ['6443/tcp']
+firewalld_ports:
+  - '6443/tcp'   # Kubernetes API server
+  - '2379/tcp'   # etcd server
+  - '2380/tcp'   # etcd client
+  - '10250/tcp'  # Kubelet API
+  - '10259/tcp'  # kube-scheduler
+  - '10257/tcp'  # kube-controller-manager
