@@ -34,3 +34,18 @@
         owner: root
         group: root
         mode: "0644"
+
+    - name: Install Kubernetes packages
+      ansible.builtin.dnf:
+        name:
+          - "kubeadm-{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
+          - "kubectl-{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
+          - "kubelet-{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
+        state: installed
+
+    - name: Start kubelet service
+      ansible.builtin.systemd:
+        name: kubelet
+        state: started
+        enabled: true
+        daemon_reload: true
