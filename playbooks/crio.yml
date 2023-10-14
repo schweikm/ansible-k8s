@@ -1,0 +1,49 @@
+- name: CRI-O
+  hosts: control_plane
+  gather_facts: true
+  gather_subset:
+    - min
+  tags:
+    - crio
+  vars:
+    crio_pv: /dev/sdb
+    crio_vg: k8s
+    crio_lv: var_lib_containers
+  tasks:
+    - name: Create volume group
+      community.general.lvg:
+        state: present
+        pvs:
+          - "{{ crio_pv }}"
+        vg: "{{ crio_vg }}"
+
+    - name: Create logical volume
+      community.general.lvol:
+        state: present
+        vg: "{{ crio_vg }}"
+        lv: "{{ crio_lv }}"
+        size: 50g
+        shrink: false
+
+    - name: Create filesystem
+      community.general.filesystem:
+        state: present
+        dev: "/dev/{{ crio_vg }}/{{ crio_lv }}"
+        fstype: xfs
+        resizefs: true
+
+    - name: Create mount directory
+      ansible.builtin.file:
+        state: directory
+        path: /var/lib/containers
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Mount filesystem
+      ansible.posix.mount:
+        state: mounted
+        fstype: xfs
+        opts: nodev,nosuid
+        path: /var/lib/containers
+        src: "/dev/{{ crio_vg }}/{{ crio_lv }}"
