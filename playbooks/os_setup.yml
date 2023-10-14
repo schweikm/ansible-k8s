@@ -41,3 +41,19 @@
         firewall:
           - port: "{{ firewalld_ports }}"
             state: enabled
+
+    # https://fedoraproject.org/wiki/Changes/SwapOnZRAM#How_can_it_be_disabled?
+    - name: Disable ZRAM swap
+      ansible.builtin.systemd:
+        name: systemd-zram-setup@zram0
+        state: stopped
+        enabled: false
+
+    - name: Remove ZRAM packages
+      ansible.builtin.dnf:
+        name:
+          - zram-generator
+          - zram-generator-defaults
+        state: absent
+        allowerasing: true
+        autoremove: true
