@@ -1,6 +1,11 @@
 ---
 - name: OS Configuration
   hosts: all
+  gather_facts: true
+  gather_subset:
+    - min
+  tags:
+    - os
   tasks:
     - name: SELinux
       ansible.builtin.import_role:

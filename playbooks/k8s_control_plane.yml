@@ -5,6 +5,11 @@
 
 - name: Kubernetes Control Plane
   hosts: control_plane
+  gather_facts: true
+  gather_subset:
+    - min
+  tags:
+    - k8s
   tasks:
     - name: Load modules
       ansible.builtin.include_tasks: tasks/systemd_load_module.yml
