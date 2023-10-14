@@ -61,3 +61,41 @@
           stream={{ k8s.version.major }}.{{ k8s.version.minor }}
           profiles=
           state=enabled
+
+    - name: Install CRI-O package
+      ansible.builtin.dnf:
+        name: cri-o
+        state: installed
+      notify:
+        - Restart crio
+
+    - name: Create CNI directory
+      ansible.builtin.file:
+        state: directory
+        path: /etc/cni/net.d
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Create default CNI configuration
+      ansible.builtin.copy:
+        src: files/10-crio-bridge.conflist
+        dest: /etc/cni/net.d/10-crio-bridge.conflist
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Restart crio
+
+    - name: Start CRI-O service
+      ansible.builtin.systemd:
+        name: crio
+        state: started
+        enabled: true
+        daemon_reload: true
+      when: false
+  handlers:
+    - name: Restart crio
+      ansible.builtin.systemd:
+        name: crio
+        state: restarted
