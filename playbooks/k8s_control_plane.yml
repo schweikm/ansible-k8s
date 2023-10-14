@@ -5,3 +5,6 @@
 
 - name: CRI-O Configuration
   ansible.builtin.import_playbook: crio.yml
+
+- name: Kubernetes Configuration
+  ansible.builtin.import_playbook: kubernetes.yml

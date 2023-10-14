@@ -1,0 +1,36 @@
+---
+
+- name: Kubernetes
+  hosts: all
+  gather_facts: true
+  gather_subset:
+    - min
+  tags:
+    - k8s
+  tasks:
+    - name: Deliver RPM GPG KEY
+      ansible.builtin.copy:
+        src: files/RPM-GPG-KEY-kubernetes-2023
+        dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-kubernetes-2023
+        owner: root
+        group: root
+        mode: "0644"
+
+    - name: Import RPM GPG KEY
+      ansible.builtin.rpm_key:
+        state: present
+        key: /etc/pki/rpm-gpg/RPM-GPG-KEY-kubernetes-2023
+
+    - name: Create kubernetes yum repo
+      ansible.builtin.yum_repository:
+        state: present
+        name: Kubernetes
+        description: Kubernetes
+        baseurl: "https://pkgs.k8s.io/core:/stable:/v{{ k8s.version.major }}.{{ k8s.version.minor }}/rpm/"
+        enabled: true
+        gpgcheck: true
+        gpgkey:
+          - 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-kubernetes-2023'
+        owner: root
+        group: root
+        mode: "0644"
