@@ -62,20 +62,25 @@
           profiles=
           state=enabled
 
-    - name: Install CRI-O package
+    - name: Install CRI-O packages
       ansible.builtin.dnf:
-        name: cri-o
+        name:
+          - cri-o
+          - containernetworking-plugins
         state: installed
       notify:
         - Restart crio
 
-    - name: Create CNI directory
+    - name: Create CNI directories
       ansible.builtin.file:
         state: directory
-        path: /etc/cni/net.d
+        path: "{{ item }}"
         owner: root
         group: root
         mode: "0755"
+      loop:
+        - /etc/cni/net.d
+        - /var/lib/crio
 
     - name: Create default CNI configuration
       ansible.builtin.copy:
