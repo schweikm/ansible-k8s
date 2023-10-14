@@ -1,0 +1,1 @@
+playbooks/os_setup.yml var-naming[no-role-prefix]
