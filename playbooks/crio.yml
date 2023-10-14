@@ -1,3 +1,5 @@
+---
+
 - name: CRI-O
   hosts: control_plane
   gather_facts: true
@@ -47,6 +49,28 @@
         opts: nodev,nosuid
         path: /var/lib/containers
         src: "/dev/{{ crio_vg }}/{{ crio_lv }}"
+
+    - name: Load modules
+      ansible.builtin.include_tasks: tasks/systemd_load_module.yml
+      vars:
+        module: "{{ item }}"
+        persistent: true
+      loop:
+        - br_netfilter
+        - overlay
+
+    - name: Kernel Settings
+      ansible.posix.sysctl:
+        name: "{{ item.name }}"
+        value: "{{ item.value }}"
+        sysctl_file: /etc/sysctl.d/k8s.conf
+        sysctl_set: true
+        state: present
+        reload: true
+      loop:
+        - { name: net.ipv4.ip_forward, value: '1' }
+        - { name: net.bridge.bridge-nf-call-iptables, value: '1' }
+        - { name: net.bridge.bridge-nf-call-ip6tables, value: '1' }
 
     # https://github.com/ansible/ansible/issues/64852#issuecomment-760454213
     - name: Enable CRIO dnf module
