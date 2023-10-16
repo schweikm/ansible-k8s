@@ -43,12 +43,16 @@
           - port: "{{ firewalld_ports }}"
             state: enabled
 
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
     # https://fedoraproject.org/wiki/Changes/SwapOnZRAM#How_can_it_be_disabled?
     - name: Disable ZRAM swap
       ansible.builtin.systemd:
         name: systemd-zram-setup@zram0
         state: stopped
         enabled: false
+      when: "'systemd-zram-setup@zram0.service' in ansible_facts.services"
 
     - name: Remove ZRAM packages
       ansible.builtin.dnf:
