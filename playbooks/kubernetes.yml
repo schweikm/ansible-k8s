@@ -8,6 +8,14 @@
   tags:
     - k8s
   tasks:
+    - name: Create etcd LV
+      ansible.builtin.include_tasks: tasks/create_lv.yml
+      vars:
+        vg_name: "{{ crio_vg }}"
+        lv_name: var_lib_etcd
+        lv_size: 2g
+        lv_mount_dir: /var/lib/etcd
+
     - name: Deliver RPM GPG KEY
       ansible.builtin.copy:
         src: files/RPM-GPG-KEY-kubernetes-2023

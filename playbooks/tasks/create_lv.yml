@@ -19,7 +19,7 @@
   community.general.filesystem:
     state: present
     dev: "/dev/{{ vg_name }}/{{ lv_name }}"
-    fstype: "{{ lv_fstype }}"
+    fstype: "{{ lv_fstype | default('ext4') }}"
     resizefs: true
 
 - name: Create mount directory
@@ -33,7 +33,7 @@
 - name: Mount filesystem
   ansible.posix.mount:
     state: mounted
-    fstype: "{{ lv_fstype }}"
+    fstype: "{{ lv_fstype | default('ext4') }}"
     opts: "{{ lv_mount_options | default('nodev,nosuid') }}"
     path: "{{ lv_mount_dir }}"
     src: "/dev/{{ vg_name }}/{{ lv_name }}"
