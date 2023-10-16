@@ -1,0 +1,39 @@
+---
+
+# vg_name
+# lv_name
+# lv_size
+# lv_fstype
+# lv_mount_dir
+# lv_mount_options
+
+- name: Create logical volume
+  community.general.lvol:
+    state: present
+    vg: "{{ vg_name }}"
+    lv: "{{ lv_name }}"
+    size: "{{ lv_size }}"
+    shrink: false
+
+- name: Create filesystem
+  community.general.filesystem:
+    state: present
+    dev: "/dev/{{ vg_name }}/{{ lv_name }}"
+    fstype: "{{ lv_fstype }}"
+    resizefs: true
+
+- name: Create mount directory
+  ansible.builtin.file:
+    state: directory
+    path: "{{ lv_mount_dir }}"
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Mount filesystem
+  ansible.posix.mount:
+    state: mounted
+    fstype: "{{ lv_fstype }}"
+    opts: "{{ lv_mount_options | default('nodev,nosuid') }}"
+    path: "{{ lv_mount_dir }}"
+    src: "/dev/{{ vg_name }}/{{ lv_name }}"

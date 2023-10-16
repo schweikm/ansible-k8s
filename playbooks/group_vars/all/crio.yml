@@ -1,0 +1,5 @@
+---
+
+crio_pv: /dev/sdb
+crio_vg: k8s
+crio_lv: var_lib_containers
