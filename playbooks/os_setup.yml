@@ -1,7 +1,7 @@
 ---
 
 - name: OS Configuration
-  hosts: all
+  hosts: control_plane
   gather_facts: true
   gather_subset:
     - min

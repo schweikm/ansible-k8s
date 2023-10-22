@@ -5,3 +5,7 @@ k8s:
     major: 1
     minor: 27
     patch: 7
+
+control_plane:
+  ip: 172.20.0.10
+  dns: k8s.turbo.local

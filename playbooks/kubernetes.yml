@@ -1,10 +1,11 @@
 ---
 
 - name: Kubernetes
-  hosts: all
+  hosts: control_plane
   gather_facts: true
   gather_subset:
     - min
+    - network
   tags:
     - k8s
   tasks:
@@ -15,6 +16,11 @@
         lv_name: var_lib_etcd
         lv_size: 2g
         lv_mount_dir: /var/lib/etcd
+
+    - name: Ensure etcd is empty
+      ansible.builtin.file:
+        path: /var/lib/etcd/lost+found
+        state: absent
 
     - name: Deliver RPM GPG KEY
       ansible.builtin.copy:
@@ -57,3 +63,35 @@
         state: started
         enabled: true
         daemon_reload: true
+
+    - name: Pull Images
+      ansible.builtin.command:
+        argv:
+          - /usr/bin/kubeadm
+          - config
+          - images
+          - pull
+          - --kubernetes-version
+          - "{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.major }}"
+      changed_when: false
+
+    - name: Kubeadm init
+      ansible.builtin.include_tasks: tasks/kubeadm_init.yml
+      when: inventory_hostname in groups['primary']
+
+    - name: Create .kube directory
+      ansible.builtin.file:
+        path: /root/.kube
+        state: directory
+        owner: root
+        group: root
+        mode: "0700"
+
+    - name: Setup default login
+      ansible.builtin.copy:
+        src: /etc/kubernetes/admin.conf
+        dest: /root/.kube/config
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0600"
