@@ -34,7 +34,17 @@
         crypto_policies_reload: true
         crypto_policies_reboot_ok: true
 
-    - name: Firewalld
+    - name: Firewalld Public
+      ansible.builtin.import_role:
+        name: fedora.linux_system_roles.firewall
+      vars:
+        firewall_disable_conflicting_services: true
+        firewall:
+          - port: 6443/tcp
+            state: enabled
+            zone: public
+
+    - name: Firewalld Kubernetes
       ansible.builtin.import_role:
         name: fedora.linux_system_roles.firewall
       vars:
@@ -42,6 +52,7 @@
         firewall:
           - port: "{{ firewalld_ports }}"
             state: enabled
+            zone: kubernetes
 
     - name: Gather service facts
       ansible.builtin.service_facts:
