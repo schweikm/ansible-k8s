@@ -96,7 +96,6 @@
         state: started
         enabled: true
         daemon_reload: true
-      when: false
   handlers:
     - name: Restart crio
       ansible.builtin.systemd:
