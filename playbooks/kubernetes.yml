@@ -9,6 +9,26 @@
   tags:
     - k8s
   tasks:
+    - name: Add host entry for control plane vip
+      ansible.builtin.include_tasks: tasks/add_host_entry.yml
+      vars:
+        host_ip: "{{ control_plane.ip }}"
+        host_fqdn: "{{ control_plane.dns }}"
+
+    - name: Add host entry for primary
+      ansible.builtin.include_tasks: tasks/add_host_entry.yml
+      vars:
+        host_ip: "{{ hostvars[item]['control_plane_ip'] }}"
+        host_fqdn: "{{ item }}"
+      loop: "{{ groups['primary'] }}"
+
+    - name: Add host entry for backups
+      ansible.builtin.include_tasks: tasks/add_host_entry.yml
+      vars:
+        host_ip: "{{ hostvars[item]['control_plane_ip'] }}"
+        host_fqdn: "{{ item }}"
+      loop: "{{ groups['backups'] }}"
+
     - name: Create etcd LV
       ansible.builtin.include_tasks: tasks/create_lv.yml
       vars:
@@ -78,6 +98,10 @@
     - name: Kubeadm init
       ansible.builtin.include_tasks: tasks/kubeadm_init.yml
       when: inventory_hostname in groups['primary']
+
+    - name: Kubeadm join
+      ansible.builtin.include_tasks: tasks/kubeadm_join.yml
+      when: inventory_hostname in groups['backups']
 
     - name: Create .kube directory
       ansible.builtin.file:

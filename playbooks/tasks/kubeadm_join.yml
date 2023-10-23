@@ -1,0 +1,17 @@
+---
+
+- name: Kubeadm join
+  ansible.builtin.command:
+    argv:
+      - /usr/bin/kubeadm
+      - join
+      - --apiserver-advertise-address
+      - "{{ hostvars[inventory_hostname]['control_plane']['ip'] }}"
+      - --control-plane
+    creates: /etc/kubernetes/admin.conf
+
+- name: Show command output
+  ansible.builtin.debug:
+    var: kubeadm_join
+  when: kubeadm_join.changed
+  register: kubeadm_join

@@ -1,0 +1,11 @@
+---
+
+# @host_ip
+# @host_fqdn
+
+- name: "Add /etc/hosts entry for {{ host_fqdn }}"
+  ansible.builtin.lineinfile:
+    state: present
+    line: "{{ host_ip }}  {{ host_fqdn }}  {{ host_fqdn | split('.') | first }}"
+    path: /etc/hosts
+    search_string: "{{ host_ip }}"
