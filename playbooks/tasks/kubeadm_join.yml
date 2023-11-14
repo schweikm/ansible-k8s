@@ -1,17 +1,14 @@
 ---
 
-- name: Kubeadm join
-  ansible.builtin.command:
-    argv:
-      - /usr/bin/kubeadm
-      - join
-      - --apiserver-advertise-address
-      - "{{ hostvars[inventory_hostname]['control_plane']['ip'] }}"
-      - --control-plane
-    creates: /etc/kubernetes/admin.conf
+- name: Render kubeadm join
+  ansible.builtin.template:
+    src: templates/kubeadm_join.sh.j2
+    dest: /etc/kubernetes/join.sh
+    owner: root
+    group: root
+    mode: "0755"
 
-- name: Show command output
-  ansible.builtin.debug:
-    var: kubeadm_join
-  when: kubeadm_join.changed
-  register: kubeadm_join
+- name: Kubeadm join via script
+  ansible.builtin.command:
+    cmd: /etc/kubernetes/join.sh
+    creates: /etc/kubernetes/admin.conf

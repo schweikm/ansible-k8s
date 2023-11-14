@@ -1,6 +1,7 @@
 ---
 
 firewalld_ports:
+  - '22/tcp'     # ssh
   - '6443/tcp'   # Kubernetes API server
   - '2379/tcp'   # etcd server
   - '2380/tcp'   # etcd client

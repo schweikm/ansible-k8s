@@ -1,0 +1,6 @@
+#!/bin/bash
+set -u
+
+"{{ hostvars[groups['primary']]['join_cmd'] }}" \
+  --apiserver-advertise-address "{{ hostvars[inventory_hostname]['control_plane_ip'] }}" \
+  --control-plane

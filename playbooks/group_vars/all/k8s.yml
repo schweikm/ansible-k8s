@@ -7,5 +7,5 @@ k8s:
     patch: 7
 
 control_plane:
-  ip: 172.20.0.10
+  ip: 192.168.86.240
   dns: k8s.turbo.local

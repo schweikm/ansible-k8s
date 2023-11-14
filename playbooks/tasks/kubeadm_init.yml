@@ -1,24 +1,21 @@
 ---
 
-- name: Kubeadm init
-  ansible.builtin.command:
-    argv:
-      - /usr/bin/kubeadm
-      - init
-      - --apiserver-advertise-address
-      - "{{ hostvars[inventory_hostname]['control_plane']['ip'] }}"
-      - --apiserver-cert-extra-sans
-      - "{{ control_plane.ip }},{{ control_plane.dns }}"
-      - --control-plane-endpoint
-      - "{{ control_plane.dns }}"
-      - --kubernetes-version
-      - "{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
-      - --pod-network-cidr
-      - 10.244.0.0/16
-    creates: /etc/kubernetes/admin.conf
-  register: kubeadm_init
+- name: Render kubeadm init
+  ansible.builtin.template:
+    src: templates/kubeadm_init.sh.j2
+    dest: /etc/kubernetes/init.sh
+    owner: root
+    group: root
+    mode: "0755"
 
-- name: Show command output
-  ansible.builtin.debug:
-    var: kubeadm_init
-  when: kubeadm_init.changed
+- name: Kubeadm init via script
+  ansible.builtin.command:
+    cmd: /etc/kubernetes/init.sh
+    creates: /etc/kubernetes/admin.conf
+
+- name: Create join command
+  ansible.builtin.command:
+    cmd: kubeadm token create --ttl 1h --print-join-command
+  register: join_cmd
+
+## XXX: install CNI
