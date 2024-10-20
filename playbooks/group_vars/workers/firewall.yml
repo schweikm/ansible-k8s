@@ -7,3 +7,9 @@ firewalld_ports:
   - '10250/tcp'        # Kubelet API
   - '10256/tcp'        # kube-proxy
   - '30000-32767/tcp'  # NodePort Services†
+
+  - '4240/tcp'   # cilium health
+  - '8472/udp'   # cilium vxlan
+  - '4244/tcp'   # hubble server
+  - '7946/tcp'   # metallb
+  - '51871/udp'  # cilium wireguard
