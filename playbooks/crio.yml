@@ -83,6 +83,7 @@
         name:
           - cri-o
           - containernetworking-plugins
+          - container-selinux
         state: installed
       notify:
         - Restart crio
