@@ -17,5 +17,6 @@
   ansible.builtin.command:
     cmd: kubeadm token create --ttl 1h --print-join-command
   register: join_cmd
+  changed_when: false
 
 ## XXX: install CNI
