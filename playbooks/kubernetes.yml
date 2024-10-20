@@ -8,19 +8,36 @@
     - network
   tags:
     - k8s
+  vars:
+    manage_lvm: false
   tasks:
-    - name: Add host entry for control plane vip
-      ansible.builtin.include_tasks: tasks/add_host_entry.yml
-      vars:
-        host_ip: "{{ control_plane.ip }}"
-        host_fqdn: "{{ control_plane.dns }}"
+    - name: Control Plane IP is unique
+      when: "control_plane.ip != hostvars[groups['primary'][0]]['control_plane_ip']"
+      block:
+        - name: Add host entry for control plane vip
+          ansible.builtin.include_tasks: tasks/add_host_entry.yml
+          vars:
+            host_ip: "{{ control_plane.ip }}"
+            host_fqdn: "{{ control_plane.dns }}"
 
-    - name: Add host entry for primary
-      ansible.builtin.include_tasks: tasks/add_host_entry.yml
-      vars:
-        host_ip: "{{ hostvars[item]['control_plane_ip'] }}"
-        host_fqdn: "{{ item }}"
-      loop: "{{ groups['primary'] }}"
+        - name: Add host entry for primary
+          ansible.builtin.include_tasks: tasks/add_host_entry.yml
+          vars:
+            host_ip: "{{ hostvars[item]['control_plane_ip'] }}"
+            host_fqdn: "{{ item }}"
+          loop: "{{ groups['primary'] }}"
+
+    - name: Control Plane IP is shared
+      when: "control_plane.ip == hostvars[groups['primary'][0]]['control_plane_ip']"
+      block:
+        - name: Add host entry for primary and vip
+          ansible.builtin.include_tasks: tasks/add_host_entry.yml
+          vars:
+            host_ip: "{{ hostvars[item]['control_plane_ip'] }}"
+            host_fqdn: "{{ item }}"
+            host_aliases:
+              - "{{ control_plane.dns }}"
+          loop: "{{ groups['primary'] }}"
 
     - name: Add host entry for backups
       ansible.builtin.include_tasks: tasks/add_host_entry.yml
@@ -29,6 +46,13 @@
         host_fqdn: "{{ item }}"
       loop: "{{ groups['backups'] }}"
 
+    - name: Add host entry for workers
+      ansible.builtin.include_tasks: tasks/add_host_entry.yml
+      vars:
+        host_ip: "{{ hostvars[item]['control_plane_ip'] }}"
+        host_fqdn: "{{ item }}"
+      loop: "{{ groups['workers'] }}"
+
     - name: Create etcd LV
       ansible.builtin.include_tasks: tasks/create_lv.yml
       vars:
@@ -36,6 +60,7 @@
         lv_name: var_lib_etcd
         lv_size: 2g
         lv_mount_dir: /var/lib/etcd
+      when: manage_lvm
 
     - name: Ensure etcd is empty
       ansible.builtin.file:
