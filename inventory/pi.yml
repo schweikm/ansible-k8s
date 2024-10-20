@@ -1,0 +1,24 @@
+---
+all:
+  children:
+    kubernetes:
+      children:
+        control_plane:
+          children:
+            primary:
+              hosts:
+                pi4b01.turbo.internal:
+                  ansible_host: 192.168.10.61
+                  control_plane_ip: 192.168.10.61
+            backups: {}
+        workers:
+          hosts:
+            pi4b02.turbo.internal:
+              ansible_host: 192.168.10.62
+              control_plane_ip: 192.168.10.62
+            pi4b03.turbo.internal:
+              ansible_host: 192.168.10.63
+              control_plane_ip: 192.168.10.63
+            pi4b04.turbo.internal:
+              ansible_host: 192.168.10.64
+              control_plane_ip: 192.168.10.64

@@ -1,7 +1,7 @@
 ---
 
 - name: OS Configuration
-  hosts: control_plane
+  hosts: control_plane,workers
   gather_facts: true
   gather_subset:
     - min
@@ -43,6 +43,7 @@
           - port: "{{ firewalld_ports }}"
             state: enabled
             zone: public
+            source: "{{ pod_cidr }}"
 
     - name: Gather service facts
       ansible.builtin.service_facts:
@@ -55,11 +56,28 @@
         enabled: false
       when: "'systemd-zram-setup@zram0.service' in ansible_facts.services"
 
-    - name: Remove ZRAM packages
-      ansible.builtin.dnf:
-        name:
-          - zram-generator
-          - zram-generator-defaults
-        state: absent
-        allowerasing: true
-        autoremove: true
+    - name: Determine if swap is active
+      ansible.builtin.command:
+        cmd: swapon -s
+      register: swapon
+      changed_when: false
+
+    - name: Turn off swap at runtime
+      ansible.builtin.command:
+        cmd: swapoff -a
+      when: swapon.stdout_lines | length > 0
+      changed_when: true
+
+    - name: Determine if zram generator is enabled
+      ansible.builtin.stat:
+        path: /etc/systemd/zram-generator.conf
+      register: zram_stat
+
+    - name: Disable zram
+      ansible.builtin.file:
+        path: /etc/systemd/zram-generator.conf
+        state: touch
+        owner: root
+        group: root
+        mode: '0644'
+      when: not zram_stat.stat.exists

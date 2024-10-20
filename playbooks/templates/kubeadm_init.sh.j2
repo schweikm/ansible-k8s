@@ -7,4 +7,4 @@ set -u
   --apiserver-cert-extra-sans "{{ control_plane.ip }},{{ control_plane.dns }}" \
   --control-plane-endpoint "{{ control_plane.dns }}" \
   --kubernetes-version "{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}" \
-  --pod-network-cidr 10.244.0.0/16
+  --pod-network-cidr "{{ pod_cidr }}"

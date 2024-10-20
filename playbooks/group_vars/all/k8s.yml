@@ -3,9 +3,11 @@
 k8s:
   version:
     major: 1
-    minor: 27
-    patch: 7
+    minor: 31
+    patch: 1
 
 control_plane:
-  ip: 192.168.86.240
-  dns: k8s.turbo.local
+  ip: 192.168.10.61
+  dns: k8s.pi.turbo.internal
+
+pod_cidr: 10.244.0.0/16

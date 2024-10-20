@@ -1,0 +1,9 @@
+---
+
+firewalld_ports:
+  - '22/tcp'           # ssh
+  - '9090/tcp'         # cockpit
+
+  - '10250/tcp'        # Kubelet API
+  - '10256/tcp'        # kube-proxy
+  - '30000-32767/tcp'  # NodePort Services†

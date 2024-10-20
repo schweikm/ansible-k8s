@@ -1,16 +1,16 @@
 ---
 all:
   children:
-    kubernetes:
+    kubernetes2:
       children:
-        control_plane:
+        control_plane2:
           children:
-            primary:
+            primary2:
               hosts:
                 k8s01.turbo.local:
                   ansible_host: 192.168.86.241
                   control_plane_ip: 192.168.86.241
-            backups:
+            backups2:
               hosts:
                 k8s02.turbo.local:
                   ansible_host: 192.168.86.242
