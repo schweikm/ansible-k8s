@@ -1,28 +1,33 @@
 ---
 
 - name: CRI-O
-  hosts: control_plane
+  hosts: control_plane,workers
   gather_facts: true
   gather_subset:
     - min
   tags:
     - crio
+  vars:
+    manage_lvm: false
   tasks:
-    - name: Create volume group
-      community.general.lvg:
-        state: present
-        pvs:
-          - "{{ crio_pv }}"
-        vg: "{{ crio_vg }}"
+    - name: Configure LVM
+      when: manage_lvm
+      block:
+        - name: Create volume group
+          community.general.lvg:
+            state: present
+            pvs:
+              - "{{ crio_pv }}"
+            vg: "{{ crio_vg }}"
 
-    - name: Create CRI-O LV
-      ansible.builtin.include_tasks: tasks/create_lv.yml
-      vars:
-        vg_name: "{{ crio_vg }}"
-        lv_name: "{{ crio_lv }}"
-        lv_size: 50g
-        lv_fstype: xfs
-        lv_mount_dir: /var/lib/containers
+        - name: Create CRI-O LV
+          ansible.builtin.include_tasks: tasks/create_lv.yml
+          vars:
+            vg_name: "{{ crio_vg }}"
+            lv_name: "{{ crio_lv }}"
+            lv_size: 50g
+            lv_fstype: xfs
+            lv_mount_dir: /var/lib/containers
 
     - name: Load modules
       ansible.builtin.include_tasks: tasks/systemd_load_module.yml
@@ -46,19 +51,32 @@
         - { name: net.bridge.bridge-nf-call-iptables, value: '1' }
         - { name: net.bridge.bridge-nf-call-ip6tables, value: '1' }
 
-    # https://github.com/ansible/ansible/issues/64852#issuecomment-760454213
-    - name: Enable CRIO dnf module
+    - name: Deliver RPM GPG KEY
       ansible.builtin.copy:
+        src: files/RPM-GPG-KEY-CRI-O
+        dest: /etc/pki/rpm-gpg/RPM-GPG-KEY-CRI-O
         owner: root
         group: root
         mode: "0644"
-        dest: /etc/dnf/modules.d/cri-o.module
-        content: |
-          [cri-o]
-          name=cri-o
-          stream={{ k8s.version.major }}.{{ k8s.version.minor }}
-          profiles=
-          state=enabled
+
+    - name: Import RPM GPG KEY
+      ansible.builtin.rpm_key:
+        state: present
+        key: /etc/pki/rpm-gpg/RPM-GPG-KEY-CRI-O
+
+    - name: Create CRI-O yum repo
+      ansible.builtin.yum_repository:
+        state: present
+        name: CRI-O
+        description: CRI-O
+        baseurl: "https://pkgs.k8s.io/addons:/cri-o:/stable:/v{{ k8s.version.major }}.{{ k8s.version.minor }}/rpm/"
+        enabled: true
+        gpgcheck: true
+        gpgkey:
+          - 'file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CRI-O'
+        owner: root
+        group: root
+        mode: "0644"
 
     - name: Install CRI-O packages
       ansible.builtin.dnf:
@@ -96,6 +114,7 @@
         state: started
         enabled: true
         daemon_reload: true
+
   handlers:
     - name: Restart crio
       ansible.builtin.systemd:
