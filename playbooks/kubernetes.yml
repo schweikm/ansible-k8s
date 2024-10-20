@@ -1,7 +1,7 @@
 ---
 
 - name: Kubernetes
-  hosts: control_plane
+  hosts: control_plane,workers
   gather_facts: true
   gather_subset:
     - min
@@ -100,6 +100,8 @@
           - "kubeadm-{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
           - "kubectl-{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
           - "kubelet-{{ k8s.version.major }}.{{ k8s.version.minor }}.{{ k8s.version.patch }}"
+          - socat
+          - iproute-tc
         state: installed
 
     - name: Start kubelet service
@@ -135,6 +137,7 @@
         owner: root
         group: root
         mode: "0700"
+      when: inventory_hostname in groups['control_plane']
 
     - name: Setup default login
       ansible.builtin.copy:
@@ -144,3 +147,4 @@
         owner: root
         group: root
         mode: "0600"
+      when: inventory_hostname in groups['control_plane']
